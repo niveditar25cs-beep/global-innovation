@@ -26,3 +26,7 @@ Thumbs.db
 
 # Agents
 .agents/
+
+# Environment and Node
+.env
+node_modules/
