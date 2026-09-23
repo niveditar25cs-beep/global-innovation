@@ -1,0 +1,80 @@
+# =============================================================================
+# .dockerignore — Exclude development artifacts from Docker build context
+#
+# Keep the build context small, fast, and free of local secrets.
+# =============================================================================
+
+# ─── Python bytecode and cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# ─── Test infrastructure
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+nosetests.xml
+tests/
+
+# ─── Virtual environments (never copy local venvs into the image)
+.venv/
+venv/
+env/
+ENV/
+.virtualenv/
+
+# ─── Local secrets (NEVER include in build context)
+.env
+.env.local
+.env.*.local
+
+# ─── Version control
+.git/
+.gitignore
+.gitattributes
+
+# ─── IDE and editor metadata
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ─── Documentation and scratch files
+*.md
+docs/
+README*
+CHANGELOG*
+
+# ─── Database local data and SQLite files
+*.db
+*.sqlite3
+*.sqlite
+verify_database.py
+import_dataset.py
+test_api.py
+
+# ─── Docker files (not needed inside the image itself)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# ─── Log files
+*.log
+logs/
+
+# ─── Alembic generated files (migrations are baked in, not regenerated at runtime)
+# Note: Keep alembic/ itself, only exclude runtime-generated artifacts
+alembic/versions/*.pyc
+
+# ─── Build artifacts
+dist/
+build/
+*.egg-info/
+*.egg

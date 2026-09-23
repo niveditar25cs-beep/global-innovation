@@ -1,0 +1,132 @@
+# =============================================================================
+# docker-compose.yml — Local development orchestration
+#
+# Services:
+#   postgres  — PostgreSQL 15 database with persistent volume
+#   redis     — Redis 7 cache and cursor store with persistence
+#   backend   — FastAPI application (waits for healthy postgres + redis)
+#
+# Usage:
+#   1. cp backend/.env.example backend/.env   # configure secrets
+#   2. docker compose up --build -d           # start all services
+#   3. docker compose logs -f backend         # tail application logs
+#   4. docker compose down -v                 # stop and remove volumes
+# =============================================================================
+
+name: transformer-risk-monitoring
+
+services:
+
+  # ─────────────────────────── PostgreSQL ────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-transformer_db}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-transformer_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - backend_net
+
+  # ─────────────────────────── Redis ─────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: >
+      redis-server
+        --save 60 1
+        --loglevel notice
+        --maxmemory ${REDIS_MAXMEMORY:-128mb}
+        --maxmemory-policy allkeys-lru
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    networks:
+      - backend_net
+
+  # ─────────────────────────── FastAPI Backend ────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      # Target the final runtime stage (not the builder)
+      target: runtime
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Application settings
+      APP_NAME: ${APP_NAME:-Transformer Failure Risk Monitoring System}
+      APP_ENV: ${APP_ENV:-development}
+      HOST: "0.0.0.0"
+      PORT: "8000"
+
+      # Database — uses internal Docker network hostname 'postgres'
+      DATABASE_URL: "postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-transformer_db}"
+
+      # Redis — uses internal Docker network hostname 'redis'
+      REDIS_URL: "redis://redis:6379/0"
+      REDIS_MAX_CONNECTIONS: ${REDIS_MAX_CONNECTIONS:-20}
+      REDIS_SOCKET_TIMEOUT: ${REDIS_SOCKET_TIMEOUT:-1.5}
+      REDIS_SOCKET_CONNECT_TIMEOUT: ${REDIS_SOCKET_CONNECT_TIMEOUT:-1.5}
+      REDIS_CURSOR_TTL_SECONDS: ${REDIS_CURSOR_TTL_SECONDS:-14400}
+      REDIS_CACHE_TTL_SECONDS: ${REDIS_CACHE_TTL_SECONDS:-60}
+      REDIS_RATE_LIMIT_ENABLED: ${REDIS_RATE_LIMIT_ENABLED:-true}
+      REDIS_RATE_LIMIT_REQUESTS: ${REDIS_RATE_LIMIT_REQUESTS:-100}
+      REDIS_RATE_LIMIT_WINDOW_SECONDS: ${REDIS_RATE_LIMIT_WINDOW_SECONDS:-60}
+
+      # CORS (comma-separated origins, or * for development)
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+
+      # Dataset
+      SAMPLE_DATASET_PATH: "./data/sample_transformer_data.csv"
+
+      # Security
+      ENABLE_SECURITY_HEADERS: ${ENABLE_SECURITY_HEADERS:-true}
+      STRICT_TRANSPORT_SECURITY: ${STRICT_TRANSPORT_SECURITY:-false}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - backend_net
+    # Mount data directory so sample CSV is accessible at runtime
+    volumes:
+      - ./backend/data:/app/data:ro
+
+# ─────────────────────────── Volumes ────────────────────────────────────────
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# ─────────────────────────── Networks ────────────────────────────────────────
+networks:
+  backend_net:
+    driver: bridge

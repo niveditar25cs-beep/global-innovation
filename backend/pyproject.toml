@@ -1,0 +1,65 @@
+[project]
+name = "transformer-failure-risk-monitoring-backend"
+version = "1.0.0"
+description = "Transformer Failure Risk Monitoring System Backend"
+readme = "README.md"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "SIM",    # flake8-simplify
+    "TID",    # flake8-tidy-imports
+    "RUF",    # Ruff-specific rules
+]
+ignore = [
+    "B008",   # Do not perform function call in argument defaults (FastAPI Depends/Query/Path idiom)
+    "SIM105", # Use contextlib.suppress instead of try-except-pass
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+known-first-party = ["app"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = false
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+no_implicit_optional = true
+strict_optional = true
+
+[[tool.mypy.overrides]]
+module = [
+    "pandas",
+    "pandas.*",
+    "redis",
+    "redis.*",
+    "psycopg2",
+    "psycopg2.*",
+    "asyncpg",
+    "asyncpg.*",
+    "pytest_asyncio",
+    "pytest_asyncio.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "strict"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::starlette.exceptions.StarletteDeprecationWarning",
+]
