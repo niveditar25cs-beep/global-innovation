@@ -1,17 +1,12 @@
-from flask import Flask, request, jsonify,Flask
-from pyngrok import ngrok
+from flask import Flask, request, jsonify
 import joblib
 import pandas as pd
 import os
-app = Flask(__name__)
-
-# Set Flask app environment variable
-os.environ["FLASK_APP"] = "app.py"
 
 # Create Flask application
+app = Flask(__name__)
 
-
-# Load the trained model
+# Load trained ML model
 model_path = "logistic_regression_alarm_model.joblib"
 
 try:
@@ -23,25 +18,47 @@ except Exception as e:
     model = None
 
 
+# Home route
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({
+        "message": "Suraksha AI Alarm Detection API is running",
+        "status": "success"
+    })
+
+
+# Health check
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({
+        "status": "healthy"
+    })
+
+
 # Prediction API
 @app.route("/predict", methods=["POST"])
 def predict():
 
-    # Check if request contains JSON
+    # Check JSON input
     if not request.is_json:
         return jsonify({
             "error": "Invalid input. Expected JSON."
         }), 400
 
-    # Get JSON data
     data = request.get_json()
 
-    # Required input features
-    required_features = ["OTI", "WTI", "ATI", "OLI"]
+    # Required ML features
+    required_features = [
+        "OTI",
+        "WTI",
+        "ATI",
+        "OLI"
+    ]
 
-    # Check for missing features
+    # Check missing features
     missing_features = [
-        feature for feature in required_features
+        feature
+        for feature in required_features
         if feature not in data
     ]
 
@@ -52,7 +69,7 @@ def predict():
             "expected": required_features
         }), 400
 
-    # Check if model is loaded
+    # Check model
     if model is None:
         return jsonify({
             "error": "Model is not loaded."
@@ -60,7 +77,7 @@ def predict():
 
     try:
 
-        # Create DataFrame from input
+        # Create DataFrame
         input_df = pd.DataFrame([{
             "OTI": float(data["OTI"]),
             "WTI": float(data["WTI"]),
@@ -71,14 +88,25 @@ def predict():
         # Make prediction
         prediction = model.predict(input_df)
 
-        # Get prediction probabilities
+        # Get probabilities
         prediction_proba = model.predict_proba(input_df)
 
-        # Prepare response
+        # Alarm status
+        if int(prediction[0]) == 1:
+            alarm_status = "ALARM"
+        else:
+            alarm_status = "NO ALARM"
+
+        # Response
         result = {
             "prediction": int(prediction[0]),
-            "probability_no_alarm": float(prediction_proba[0][0]),
-            "probability_alarm": float(prediction_proba[0][1])
+            "alarm_status": alarm_status,
+            "probability_no_alarm": float(
+                prediction_proba[0][0]
+            ),
+            "probability_alarm": float(
+                prediction_proba[0][1]
+            )
         }
 
         return jsonify(result)
@@ -96,34 +124,13 @@ def predict():
         }), 500
 
 
-# Main program
+# Local development only
 if __name__ == "__main__":
 
-    # Flask port
-    port = 5000
+    port = int(os.environ.get("PORT", 10000))
 
-    # Start ngrok tunnel
-    try:
-
-        public_url = ngrok.connect(port).public_url
-
-        print("\n====================================")
-        print("       SURAKSHA AI API")
-        print("====================================")
-        print(f"ngrok URL     : {public_url}")
-        print(f"Prediction API: {public_url}/predict")
-        print(f"Local API     : http://localhost:{port}/predict")
-        print("====================================\n")
-
-    except Exception as e:
-
-        print(f"ngrok error: {e}")
-        print("Starting Flask without ngrok...")
-
-    # Start Flask server
     app.run(
         host="0.0.0.0",
         port=port,
-        debug=False,
-        use_reloader=False
+        debug=False
     )
