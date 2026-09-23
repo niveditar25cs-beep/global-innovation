@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GRIDGUARD AI — Transformer Risk Monitoring & Early Warning System</title>
+  <meta name="description" content="GridGuard AI continuous transformer early warning and failure risk monitoring system for high-voltage power networks." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Three.js & OrbitControls for Functional 3D Infrastructure -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+  <div id="app" class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">
+          <i data-lucide="shield-alert"></i>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">GRIDGUARD AI</span>
+          <span class="brand-subtitle">AI-POWERED TRANSFORMER EARLY WARNING</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu" id="nav-menu">
+        <button class="nav-item active" data-section="command-center">
+          <i data-lucide="layout-dashboard"></i>
+          <span>AI Command Center</span>
+          <span class="badge badge-risk" id="nav-risk-badge">CRITICAL</span>
+        </button>
+        <button class="nav-item" data-section="interactive-3d">
+          <i data-lucide="box"></i>
+          <span>Interactive 3D Grid View</span>
+        </button>
+        <button class="nav-item" data-section="transformer-network">
+          <i data-lucide="network"></i>
+          <span>Transformer Network</span>
+        </button>
+        <button class="nav-item" data-section="ai-insights">
+          <i data-lucide="brain-circuit"></i>
+          <span>AI Insights & XAI</span>
+          <span class="badge badge-info">NEW</span>
+        </button>
+        <button class="nav-item" data-section="alerts">
+          <i data-lucide="bell"></i>
+          <span>Alerts & Playbooks</span>
+          <span class="badge badge-count" id="active-alert-count">3</span>
+        </button>
+        <button class="nav-item" data-section="reports">
+          <i data-lucide="file-text"></i>
+          <span>Risk & Health Reports</span>
+        </button>
+        <button class="nav-item" data-section="settings">
+          <i data-lucide="sliders"></i>
+          <span>Model Settings & API</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-sentinel-status">
+        <div class="sentinel-header">
+          <span class="sentinel-dot pulse"></span>
+          <span class="sentinel-label">AI MONITORING ACTIVE</span>
+        </div>
+        <p class="sentinel-meta">Inference Latency: <strong>42ms</strong></p>
+        <p class="sentinel-meta">Model: <strong>TransfRisk-v4.8 (LSTM+Transformer)</strong></p>
+      </div>
+    </aside>
+
+    <!-- Main Container -->
+    <div class="main-wrapper">
+      <!-- Top Navigation / Header -->
+      <header class="top-header">
+        <!-- ZONE 1: Product / Page Identity -->
+        <div class="header-zone-left">
+          <h1 class="page-title" id="page-title">GRIDGUARD AI — Transformer Risk Monitoring</h1>
+          <span class="header-tagline">“Continuously analyzing transformer conditions...”</span>
+        </div>
+
+        <!-- ZONE 2: Live System Status -->
+        <div class="header-zone-center">
+          <div class="live-monitoring-pill" id="live-stream-pulse-badge">
+            <span class="sentinel-dot pulse"></span>
+            <span class="sentinel-badge-text">● LIVE MONITORING ACTIVE</span>
+          </div>
+          <div class="stream-meta-row">
+            <span class="stream-label">Sequential Dataset Stream</span>
+            <span class="live-batch-tag" id="live-batch-meta">Batch: BATCH-8901</span>
+          </div>
+        </div>
+
+        <!-- ZONE 3: Substation Selector, Network Status & User Profile -->
+        <div class="header-zone-right">
+          <!-- Network Selector -->
+          <div class="network-select-wrapper">
+            <i data-lucide="zap"></i>
+            <select id="grid-substation-select" class="select-input">
+              <option value="all">Global Network (All Grid Zones)</option>
+              <option value="sub-north">Substation Alpha - North Corridor</option>
+              <option value="sub-west" selected>Substation Beta - West High Voltage Node</option>
+              <option value="sub-east">Substation Gamma - East Metro Loop</option>
+            </select>
+          </div>
+
+          <!-- Network Status Pill -->
+          <div class="risk-pill" id="global-risk-pill">
+            <i data-lucide="triangle-alert"></i>
+            <div class="risk-pill-content">
+              <span class="risk-pill-label">NETWORK STATUS</span>
+              <strong id="global-risk-text" class="risk-pill-val">1 HIGH RISK</strong>
+            </div>
+          </div>
+
+          <button class="icon-btn" id="btn-refresh-inference" title="Trigger Manual AI Analysis Check">
+            <i data-lucide="refresh-cw"></i>
+          </button>
+
+          <div class="user-profile">
+            <div class="avatar">AI</div>
+            <div class="user-info">
+              <span class="user-name">AI Reliability Officer</span>
+              <span class="user-role">Grid Safety Operator</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content Area -->
+      <main class="content-area">
+
+        <!-- SECTION 1: AI COMMAND CENTER (PRIMARY) -->
+        <section id="section-command-center" class="view-section active">
+          
+          <!-- Top Row: Animated Overview Counters (Total, Normal, Warning, High Risk, Critical, Active Alerts) -->
+          <div class="grid-layout cols-6 mb-6" id="overview-counter-grid">
+            
+            <div class="card summary-card">
+              <span class="card-subtitle">TOTAL TRANSFORMERS</span>
+              <div class="summary-counter" id="count-total">14</div>
+              <span class="summary-meta">Monitored Assets</span>
+            </div>
+
+            <div class="card summary-card normal-accent">
+              <span class="card-subtitle">NORMAL</span>
+              <div class="summary-counter normal-text" id="count-normal">11</div>
+              <span class="summary-meta">Healthy Baseline</span>
+            </div>
+
+            <div class="card summary-card warning-accent">
+              <span class="card-subtitle">WARNING</span>
+              <div class="summary-counter warning-text" id="count-warning">1</div>
+              <span class="summary-meta">Evolving Drift</span>
+            </div>
+
+            <div class="card summary-card high-risk-accent">
+              <span class="card-subtitle">HIGH RISK</span>
+              <div class="summary-counter high-risk-text" id="count-high-risk">1</div>
+              <span class="summary-meta">Overheating / Load</span>
+            </div>
+
+            <div class="card summary-card critical-accent">
+              <span class="card-subtitle">CRITICAL</span>
+              <div class="summary-counter critical-text" id="count-critical">1</div>
+              <span class="summary-meta">Incipient Fault</span>
+            </div>
+
+            <div class="card summary-card alert-accent">
+              <span class="card-subtitle">ACTIVE ALERTS</span>
+              <div class="summary-counter alert-text" id="count-alerts">3</div>
+              <span class="summary-meta">Actions Pending</span>
+            </div>
+
+          </div>
+
+          <!-- Middle Row: Interactive 3D Transformer Network & Prominent AI Alert Panel -->
+          <div class="grid-layout cols-3-2 mb-6">
+
+            <!-- Main Interactive 3D Transformer Network Visualization Area -->
+            <div class="card span-col-2 visualizer-card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title"><i data-lucide="network"></i> Interactive 3D Transformer Network</h2>
+                  <p class="card-desc">Spatial network risk visualization. Color indicators show AI anomaly detection states.</p>
+                </div>
+                <div class="card-controls">
+                  <button class="btn btn-sm btn-secondary" id="btn-3d-reset-cam" title="Reset Camera View">
+                    <i data-lucide="rotate-ccw"></i> Reset View
+                  </button>
+                  <button class="btn btn-sm btn-outline" id="btn-3d-focus-risk" title="Focus on High Risk / Critical Asset">
+                    <i data-lucide="crosshair"></i> Focus High Risk
+                  </button>
+                  <span class="legend-item"><span class="dot dot-green"></span> Normal</span>
+                  <span class="legend-item"><span class="dot dot-amber"></span> Warning</span>
+                  <span class="legend-item"><span class="dot dot-orange"></span> High Risk</span>
+                  <span class="legend-item"><span class="dot dot-purple"></span> Critical</span>
+                </div>
+              </div>
+              
+              <div class="network-canvas-container" id="network-canvas-container">
+                <div class="canvas-grid-overlay"></div>
+                <div class="canvas-3d-hint">
+                  <i data-lucide="move-3d"></i>
+                  <span>Spatial Network View (Click transformer node to view AI Diagnostic)</span>
+                </div>
+                <div id="spatial-nodes-wrapper" class="nodes-wrapper"></div>
+              </div>
+            </div>
+
+            <!-- Prominent AI Alert Panel -->
+            <div class="card alert-panel-card critical-border">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title"><i data-lucide="shield-alert" class="icon-danger"></i> 🚨 AI EARLY WARNING</h2>
+                  <p class="card-desc">Continuous AI failure pattern detection</p>
+                </div>
+                <span class="badge badge-high-risk" id="primary-alert-badge">HIGH RISK DETECTED</span>
+              </div>
+
+              <div class="primary-alert-content" id="primary-alert-box">
+                <!-- Populated dynamically via AI Data Layer -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Row: AI Recommendation Engine & Live Recent AI Events Timeline -->
+          <div class="grid-layout cols-2">
+
+            <!-- AI Recommendation Panel -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title"><i data-lucide="bot"></i> 🤖 AI RECOMMENDATION</h2>
+                  <p class="card-desc">Prescriptive preventive action suggested prior to major failure</p>
+                </div>
+              </div>
+              <div class="recommendations-container" id="ai-recommendation-box">
+                <!-- Dynamic Recommendations content -->
+              </div>
+            </div>
+
+            <!-- Recent AI Events Live Timeline -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title"><i data-lucide="activity"></i> Recent AI Events</h2>
+                  <p class="card-desc">Real-time event stream generated by GridGuard AI Engine</p>
+                </div>
+                <span class="sentinel-label">LIVE STREAM</span>
+              </div>
+              <div class="ai-events-timeline" id="recent-ai-events-box">
+                <!-- Dynamic events rendered here -->
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title"><i data-lucide="shield-check"></i> AI Prescriptive Recommendation</h2>
+                  <p class="card-desc">Recommended preventative actions to neutralize failure risk prior to outage.</p>
+                </div>
+                <button class="btn btn-sm btn-outline" id="btn-execute-playbook">
+                  <i data-lucide="play-circle"></i> Initiate Preventive Playbook
+                </button>
+              </div>
+              <div class="recommendations-container" id="ai-recommendation-box">
+                <!-- Dynamic Recommendations content -->
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- SECTION 2: INTERACTIVE 3D GRID VIEW -->
+        <section id="section-interactive-3d" class="view-section">
+          <div class="grid-layout cols-3-2">
+            <!-- 3D Infrastructure Canvas Container -->
+            <div class="card span-col-2 visualizer-card full-height-card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title"><i data-lucide="box"></i> Interactive 3D Transformer Infrastructure Network</h2>
+                  <p class="card-desc">Real-time 3D spatial view of grid transformers (T-101 to T-106) and animated high-voltage transmission lines.</p>
+                </div>
+                <div class="card-controls">
+                  <button class="btn btn-sm btn-secondary" id="btn-3d-reset-cam-grid">
+                    <i data-lucide="rotate-ccw"></i> Reset View
+                  </button>
+                  <button class="btn btn-sm btn-outline" id="btn-3d-focus-risk-grid">
+                    <i data-lucide="crosshair"></i> Focus High Risk
+                  </button>
+                </div>
+              </div>
+
+              <div class="network-canvas-container-lg" id="grid-view-3d-container">
+                <div class="canvas-grid-overlay"></div>
+                <div class="canvas-3d-hint">
+                  <i data-lucide="move-3d"></i>
+                  <span>Rotate: Left Click Drag | Pan: Right Click Drag | Zoom: Scroll Wheel | Click Mesh: AI Diagnostic</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- AI Diagnostic Side Panel -->
+            <div class="card ai-diagnostic-side-panel" id="ai-diagnostic-panel">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title" id="diag-panel-title"><i data-lucide="brain-circuit"></i> AI Diagnostic Panel</h2>
+                  <p class="card-desc">Select any 3D transformer to inspect AI risk analysis</p>
+                </div>
+                <span class="badge badge-high-risk" id="diag-panel-badge">HIGH RISK DETECTED</span>
+              </div>
+
+              <div class="diagnostic-panel-content" id="diag-panel-body">
+                <div class="selected-asset-header">
+                  <h3 class="asset-name" id="diag-asset-name">TRANSFORMER T-104</h3>
+                  <span class="asset-substation" id="diag-asset-substation">Substation Beta - West High Voltage Node</span>
+                </div>
+
+                <div class="diag-section mt-3">
+                  <span class="field-label">AI RISK LEVEL:</span>
+                  <div class="risk-score-display danger-text" id="diag-risk-level">
+                    HIGH RISK (78.4%)
+                  </div>
+                </div>
+
+                <div class="diag-section mt-3">
+                  <span class="field-label">AI DETECTED ABNORMAL CONDITIONS:</span>
+                  <ul class="detected-bullets mt-1" id="diag-conditions-list">
+                    <li><i data-lucide="flame" class="icon-danger"></i> Continuous overheating pattern</li>
+                    <li><i data-lucide="trending-up" class="icon-warning"></i> Abnormal current increase</li>
+                    <li><i data-lucide="arrow-up-right" class="icon-purple"></i> Increasing risk trend</li>
+                  </ul>
+                </div>
+
+                <div class="diag-section mt-4">
+                  <span class="field-label">AI RECOMMENDATION:</span>
+                  <div class="diag-recommendation-box" id="diag-recommendation-text">
+                    “Inspect Transformer T-104 and its connected electrical line before the condition develops into a major failure.”
+                  </div>
+                </div>
+
+                <div class="diag-actions mt-4">
+                  <button class="btn btn-primary btn-sm w-full" onclick="window.app.switchSection('ai-insights')">
+                    <i data-lucide="search"></i> View Full AI Insights & XAI
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- SECTION 3: TRANSFORMER NETWORK -->
+        <section id="section-transformer-network" class="view-section">
+          <div class="card mb-6">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title"><i data-lucide="network"></i> Regional Grid Transformer Assets</h2>
+                <p class="card-desc">AI health and failure risk monitoring across all networked high-voltage assets.</p>
+              </div>
+              <div class="filter-controls">
+                <button class="btn btn-sm btn-filter active" data-filter="all">All Assets (14)</button>
+                <button class="btn btn-sm btn-filter" data-filter="critical">High Risk (1)</button>
+                <button class="btn btn-sm btn-filter" data-filter="normal">Healthy (13)</button>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Transformer ID</th>
+                    <th>Substation Node</th>
+                    <th>Rated Capacity</th>
+                    <th>AI Failure Risk Score</th>
+                    <th>Predicted Failure Window</th>
+                    <th>AI Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="transformer-network-table-body">
+                  <!-- Populated by Transformer Network Component -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- SECTION 4: AI INSIGHTS & EXPLANATION ENGINE -->
+        <section id="section-ai-insights" class="view-section">
+          <!-- Non-Technical Disclaimer Banner -->
+          <div class="card mb-6 advisory-banner-card">
+            <div class="advisory-icon"><i data-lucide="info" class="icon-info"></i></div>
+            <div class="advisory-text">
+              <strong>OPERATOR ADVISORY:</strong> AI Insights analyze background transformer telemetry to detect abnormal patterns and risk trends. <em>The AI does not physically control grid equipment.</em> Use these insights and prescriptive recommendations to guide maintenance decisions.
+            </div>
+          </div>
+
+          <!-- Top Row: AI Analysis Key Findings & Interactive Risk Trend Chart -->
+          <div class="grid-layout cols-2 mb-6">
+            
+            <!-- AI Analysis Key Findings Statements -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title"><i data-lucide="brain-circuit"></i> AI Analysis & Key Pattern Findings</h2>
+                  <p class="card-desc">Clear non-technical explanations generated by the AI Risk Engine</p>
+                </div>
+                <span class="badge badge-risk" id="insights-asset-tag">TARGET: T-104</span>
+              </div>
+              <div class="analysis-statements-list" id="insights-analysis-statements">
+                <div class="statement-item item-danger">
+                  <div class="statement-icon">🔥</div>
+                  <div class="statement-body">
+                    <h4>“Continuous overheating pattern detected.”</h4>
+                    <p>Winding thermal rate-of-rise has escalated by +4.2°C/hr over the past 3 hours.</p>
+                  </div>
+                </div>
+
+                <div class="statement-item item-warning">
+                  <div class="statement-icon">⚡</div>
+                  <div class="statement-body">
+                    <h4>“Abnormal current increase identified.”</h4>
+                    <p>Feeder phase currents exhibit asymmetric load surges beyond healthy baseline.</p>
+                  </div>
+                </div>
+
+                <div class="statement-item item-purple">
+                  <div class="statement-icon">📈</div>
+                  <div class="statement-body">
+                    <h4>“Risk trend is increasing.”</h4>
+                    <p>Failure probability score climbed from 45% to 88.4% within the last evaluation window.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Risk Trend Visualization Chart -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title"><i data-lucide="trending-up"></i> Dynamic Risk Level Trajectory</h2>
+                  <p class="card-desc">Historical failure risk trend mapped against critical alert threshold (70%)</p>
+                </div>
+                <div class="chart-controls">
+                  <button class="btn btn-sm btn-secondary active">24h View</button>
+                  <button class="btn btn-sm btn-secondary">7d View</button>
+                </div>
+              </div>
+              
+              <div class="insights-chart-container">
+                <div class="svg-chart-wrapper">
+                  <svg viewBox="0 0 500 180" class="risk-trend-svg">
+                    <!-- Threshold line 70% -->
+                    <line x1="0" y1="54" x2="500" y2="54" stroke="rgba(239, 68, 68, 0.4)" stroke-dasharray="4 4" stroke-width="1.5" />
+                    <text x="360" y="46" fill="#FCA5A5" font-size="10" font-weight="bold">AI CRITICAL THRESHOLD (70%)</text>
+                    
+                    <!-- Gradient Area fill -->
+                    <defs>
+                      <linearGradient id="riskGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#a855f7" stop-opacity="0.4" />
+                        <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.0" />
+                      </linearGradient>
+                    </defs>
+                    <path d="M 0 160 Q 100 150 200 130 T 350 70 T 500 20 L 500 170 L 0 170 Z" fill="url(#riskGrad)" />
+                    
+                    <!-- Trend Curve Line -->
+                    <path d="M 0 160 Q 100 150 200 130 T 350 70 T 500 20" fill="none" stroke="#A855F7" stroke-width="3" />
+                    
+                    <!-- Pulsing Alert Point on current value -->
+                    <circle cx="500" cy="20" r="6" fill="#A855F7" class="pulse-point" />
+                  </svg>
+                </div>
+                <div class="chart-timeline-ticks">
+                  <span>-24 Hours (10% Risk)</span>
+                  <span>-12 Hours (25% Risk)</span>
+                  <span>-6 Hours (55% Risk)</span>
+                  <span class="text-purple">NOW (88.4% CRITICAL)</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Row: AI Detection History & Prescriptive AI Recommendations -->
+          <div class="grid-layout cols-2">
+
+            <!-- AI Detection History Log -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title"><i data-lucide="history"></i> AI Pattern Detection History</h2>
+                  <p class="card-desc">Chronological sequence of previously identified anomaly signatures</p>
+                </div>
+              </div>
+              <div class="detection-history-list" id="insights-detection-history">
+                <div class="history-item">
+                  <div class="history-time">14:45:14</div>
+                  <div class="history-content">
+                    <strong>Incipient Bushing Arcing Pattern Flagged</strong>
+                    <p>Ultrasonic acoustic energy burst matched cellulose paper thermal breakdown profile.</p>
+                  </div>
+                  <span class="badge badge-risk">CRITICAL</span>
+                </div>
+
+                <div class="history-item">
+                  <div class="history-time">12:30:00</div>
+                  <div class="history-content">
+                    <strong>Elevated Oil Thermal Gradient Shift</strong>
+                    <p>Oil top temperature rate-of-rise accelerated past healthy baseline envelope.</p>
+                  </div>
+                  <span class="badge badge-high-risk">HIGH RISK</span>
+                </div>
+
+                <div class="history-item">
+                  <div class="history-time">08:15:22</div>
+                  <div class="history-content">
+                    <strong>Vibration Spectrum Harmonic Drift</strong>
+                    <p>Minor harmonic mechanical frequency variation detected on core assembly.</p>
+                  </div>
+                  <span class="badge badge-count">WARNING</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Prescriptive AI Recommendations -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title"><i data-lucide="shield-check"></i> Prescriptive AI Preventive Recommendations</h2>
+                  <p class="card-desc">Operator action plan generated to mitigate risk prior to outage</p>
+                </div>
+              </div>
+              <div class="insights-recommendations-list" id="insights-recommendations-list">
+                <div class="insight-rec-card">
+                  <div class="rec-badge-step">ACTION STEP 1</div>
+                  <h4>Inspect Transformer T-104 & Electrical Line</h4>
+                  <p>Inspect Transformer T-104 and its connected electrical feeder line before the overheating condition develops into a major failure.</p>
+                </div>
+
+                <div class="insight-rec-card mt-3">
+                  <div class="rec-badge-step">ACTION STEP 2</div>
+                  <h4>Reduce Load by 25% or Transfer Grid Supply</h4>
+                  <p>Reroute 25% current load to adjacent Substation Alpha feeder to decrease thermal stress on T-104 windings.</p>
+                </div>
+
+                <div class="insight-rec-card mt-3">
+                  <div class="rec-badge-step">ACTION STEP 3</div>
+                  <h4>Dispatch Maintenance Team for DGA Oil Sample</h4>
+                  <p>Conduct emergency dissolved gas analysis (DGA) test to confirm cellulose paper degradation state.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- SECTION 5: ALERTS -->
+        <section id="section-alerts" class="view-section">
+          <!-- 4 Risk State Summary Banner -->
+          <div class="grid-layout cols-4 mb-6">
+            <div class="card status-state-card normal-state">
+              <div class="state-icon">🟢</div>
+              <div class="state-info">
+                <h3>NORMAL</h3>
+                <p>“No abnormal condition detected.”</p>
+              </div>
+            </div>
+
+            <div class="card status-state-card warning-state">
+              <div class="state-icon">🟡</div>
+              <div class="state-info">
+                <h3>WARNING</h3>
+                <p>“An unusual operating pattern has been detected.”</p>
+              </div>
+            </div>
+
+            <div class="card status-state-card high-risk-state">
+              <div class="state-icon">🔴</div>
+              <div class="state-info">
+                <h3>HIGH RISK</h3>
+                <p>“High risk detected. AI identified an abnormal pattern requiring attention.”</p>
+              </div>
+            </div>
+
+            <div class="card status-state-card critical-state">
+              <div class="state-icon">🟣</div>
+              <div class="state-info">
+                <h3>CRITICAL</h3>
+                <p>“Critical risk detected. Immediate inspection is recommended.”</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dedicated Alerts Log Table Card -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title"><i data-lucide="bell"></i> AI Alert History & Operational Log</h2>
+                <p class="card-desc">Chronological log of AI-triggered warnings, risk transitions, and preventive resolutions.</p>
+              </div>
+              <div class="filter-controls">
+                <button class="btn btn-sm btn-alert-filter active" data-alert-filter="all">All Alerts</button>
+                <button class="btn btn-sm btn-alert-filter" data-alert-filter="CRITICAL">Critical (🟣)</button>
+                <button class="btn btn-sm btn-alert-filter" data-alert-filter="HIGH_RISK">High Risk (🔴)</button>
+                <button class="btn btn-sm btn-alert-filter" data-alert-filter="WARNING">Warning (🟡)</button>
+              </div>
+            </div>
+            <div class="alerts-list" id="alerts-history-list">
+              <!-- Dynamically populated by AlertsViewComponent -->
+            </div>
+          </div>
+        </section>
+
+
+        <!-- SECTION 6: REPORTS -->
+        <section id="section-reports" class="view-section">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title"><i data-lucide="file-text"></i> Transformer Reliability & AI Audit Reports</h2>
+                <p class="card-desc">Exportable diagnostic summaries for maintenance teams and utility leadership.</p>
+              </div>
+              <button class="btn btn-primary" id="btn-generate-report">
+                <i data-lucide="download"></i> Export AI Risk Executive Brief (PDF)
+              </button>
+            </div>
+            <div class="reports-grid grid-layout cols-3 mt-4" id="reports-container">
+              <!-- Dynamically loaded -->
+            </div>
+          </div>
+        </section>
+
+
+        <!-- SECTION 7: SETTINGS -->
+        <section id="section-settings" class="view-section">
+          <div class="card max-w-4xl">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title"><i data-lucide="sliders"></i> AI Model Configuration & Backend API Service</h2>
+                <p class="card-desc">Configure inference thresholds, WebSocket streaming endpoints, and backend API connections.</p>
+              </div>
+            </div>
+            <div class="settings-form">
+              <div class="form-group">
+                <label>AI Inference Model Endpoint</label>
+                <input type="text" class="form-control" id="api-endpoint-input" value="https://api.sentinel-ai-grid.internal/v1/infer/transformers" />
+                <small class="form-help">Backend inference URL for real-time model streaming.</small>
+              </div>
+
+              <div class="form-group">
+                <label>Critical Warning Failure Probability Threshold (%)</label>
+                <input type="range" class="form-range" id="threshold-range" min="50" max="95" value="75" />
+                <span class="range-val" id="threshold-val">75%</span>
+              </div>
+
+              <div class="form-group">
+                <label>Data Provider Service Mode</label>
+                <select class="form-control" id="data-provider-select">
+                  <option value="mock-stream" selected>Simulated Real-Time AI Sentinel Stream (Development Mode)</option>
+                  <option value="api-http">Production REST API Polling</option>
+                  <option value="api-websocket">Production Live WebSocket AI Stream</option>
+                </select>
+              </div>
+
+              <div class="form-actions mt-6">
+                <button class="btn btn-primary" id="btn-save-settings">Save API Configuration</button>
+                <button class="btn btn-outline" id="btn-test-connection">Test Backend Model Stream</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Application Services & Modules (Clean Architectural Separation) -->
+  <script src="src/services/aiDataService.js"></script>
+  <script src="src/services/simulationStreamService.js"></script>
+  <script src="src/services/transformer3DService.js"></script>
+  <script src="src/components/Navigation.js"></script>
+  <script src="src/components/CommandCenter.js"></script>
+  <script src="src/components/TransformerNetwork.js"></script>
+  <script src="src/components/AiInsights.js"></script>
+  <script src="src/components/AlertsView.js"></script>
+  <script src="src/components/ReportsView.js"></script>
+  <script src="src/components/SettingsView.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
