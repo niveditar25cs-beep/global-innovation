@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify,flask
+from flask import Flask, request, jsonify,Flask
 from pyngrok import ngrok
 import joblib
 import pandas as pd
