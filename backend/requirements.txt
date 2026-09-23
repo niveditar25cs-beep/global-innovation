@@ -1,8 +1,5 @@
 # =============================================================================
-# requirements.txt — Python dependencies for the backend application
-#
-# Versions are pinned for reproducible Docker image builds.
-# Update by running: pip install --upgrade <package> && pip freeze > requirements.txt
+# requirements.txt — Combined Backend + ML dependencies
 # =============================================================================
 
 # ─── Web framework
@@ -14,7 +11,7 @@ python-multipart==0.0.32
 pydantic==2.12.5
 pydantic-settings==2.14.2
 
-# ─── Database (async + sync drivers)
+# ─── Database
 sqlalchemy==2.0.51
 asyncpg==0.31.0
 psycopg2-binary==2.9.13
@@ -25,9 +22,19 @@ redis==8.1.0
 
 # ─── Data processing
 pandas==2.3.3
+numpy>=1.26.0
+scipy>=1.11.0
 
-# ─── HTTP client (used in tests and utilities)
+# ─── Machine Learning
+scikit-learn==1.5.2
+joblib>=1.3.0
+
+# ─── HTTP client
 requests==2.32.5
 
 # ─── Configuration
 python-dotenv==1.2.1
+
+# ─── ML branch compatibility
+flask>=3.0.0
+flask-cors>=4.0.0

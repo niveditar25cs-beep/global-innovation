@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart City Transformer Monitoring | AI Risk Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070b14;
+      --surface: #0f172a;
+      --surface-card: #141e33;
+      --surface-border: #1e2e4a;
+      --surface-hover: #192742;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.25);
+      --accent: #818cf8;
+      --normal: #10b981;
+      --normal-bg: rgba(16, 185, 129, 0.15);
+      --normal-border: #059669;
+      --warning: #f59e0b;
+      --warning-bg: rgba(245, 158, 11, 0.15);
+      --warning-border: #d97706;
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.15);
+      --danger-border: #dc2626;
+      --font-main: 'Outfit', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* Top Navigation */
+    header {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--surface-border);
+      padding: 1rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 700;
+      box-shadow: 0 0 16px var(--primary-glow);
+    }
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .system-status {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--normal);
+      box-shadow: 0 0 8px var(--normal);
+    }
+    .status-dot.offline { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1440px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 1.5rem 2rem;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 1.5rem;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--surface-border);
+      padding-bottom: 0.75rem;
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Scenarios Bar */
+    .scenarios-card {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: linear-gradient(90deg, #111a2e, #141e33);
+    }
+    .scenarios-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--surface-border);
+      background: var(--surface-card);
+      color: var(--text);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 4px 18px rgba(2, 132, 199, 0.5);
+      background: linear-gradient(135deg, #0369a1, #1d4ed8);
+    }
+
+    /* Telemetry Form Grid */
+    .telemetry-sections {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      max-height: calc(100vh - 270px);
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+    .telemetry-sections::-webkit-scrollbar { width: 6px; }
+    .telemetry-sections::-webkit-scrollbar-thumb { background: var(--surface-border); border-radius: 4px; }
+
+    .section-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 0.75rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .form-group label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .form-group input {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      padding: 0.4rem 0.6rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-glow);
+    }
+
+    /* Results Panel */
+    .results-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    /* Hero Risk Status Card */
+    .risk-hero {
+      background: linear-gradient(145deg, #111d33, #0b1424);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .risk-badge {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      padding: 0.5rem 1.5rem;
+      border-radius: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+    }
+    .risk-badge.normal {
+      background: var(--normal-bg);
+      border: 1px solid var(--normal-border);
+      color: var(--normal);
+      box-shadow: 0 0 24px rgba(16, 185, 129, 0.2);
+    }
+    .risk-badge.warning {
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      color: var(--warning);
+      box-shadow: 0 0 24px rgba(245, 158, 11, 0.2);
+    }
+    .risk-badge.high_risk {
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      color: var(--danger);
+      box-shadow: 0 0 28px rgba(239, 68, 68, 0.3);
+      animation: pulseAlert 1.5s infinite;
+    }
+    @keyframes pulseAlert {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.02); }
+    }
+
+    .risk-score-container {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+    .risk-score-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+    .risk-meter {
+      height: 10px;
+      background: var(--surface-card);
+      border-radius: 5px;
+      overflow: hidden;
+      position: relative;
+    }
+    .risk-meter-fill {
+      height: 100%;
+      width: 10%;
+      background: linear-gradient(90deg, var(--normal), var(--warning), var(--danger));
+      transition: width 0.4s ease;
+    }
+
+    /* Probabilities Grid */
+    .metric-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    .metric-box {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .metric-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .metric-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+
+    /* Explanation & Alert */
+    .alert-box {
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      border: 1px solid var(--surface-border);
+      background: var(--surface-card);
+    }
+    .alert-box.alert-high {
+      border-color: var(--danger-border);
+      background: var(--danger-bg);
+    }
+    .alert-box.alert-medium {
+      border-color: var(--warning-border);
+      background: var(--warning-bg);
+    }
+    .alert-box.alert-low {
+      border-color: var(--normal-border);
+      background: var(--normal-bg);
+    }
+    .alert-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .alert-text {
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+
+    .explanation-box {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+    }
+
+    /* Abnormal Parameters Table */
+    .abnormal-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    .abnormal-table th, .abnormal-table td {
+      padding: 0.4rem 0.6rem;
+      text-align: left;
+      border-bottom: 1px solid var(--surface-border);
+    }
+    .abnormal-table th {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .badge-status {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .badge-high { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); }
+    .badge-low { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning-border); }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--surface-border);
+      padding: 1rem 2rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    @media (max-width: 1024px) {
+      main { grid-template-columns: 1fr; }
+      .telemetry-sections { max-height: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <div class="brand-title">Smart City Transformer Risk Engine</div>
+        <div class="brand-subtitle">AI Fault Classification & Predictive Analytics</div>
+      </div>
+    </div>
+    <div class="system-status">
+      <div class="status-badge" id="apiStatusBadge">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Connecting to API...</span>
+      </div>
+      <div class="status-badge" id="modelFeatureBadge">
+        <span>RF (59 Features)</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Scenario Selection Bar -->
+    <div class="card scenarios-card">
+      <div class="scenarios-group">
+        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Quick Scenarios:</span>
+        <button class="btn" onclick="loadScenario('normal')" id="btnNormal">🟢 Normal Load</button>
+        <button class="btn" onclick="loadScenario('warning')" id="btnWarning">🟡 Warning / Elevated</button>
+        <button class="btn" onclick="loadScenario('high_risk')" id="btnHigh">🔴 High Risk / Overload</button>
+        <button class="btn" onclick="loadScenario('zero')" id="btnZero">⚡ Baseline Zeros</button>
+      </div>
+      <div>
+        <button class="btn btn-primary" onclick="runPrediction()" id="btnPredict">
+          <span>Run ML Risk Assessment ➔</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Left Column: Input Telemetry Form -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>📊</span> Real-Time Sensor Telemetry Input
+        </div>
+        <button class="btn" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;" onclick="resetForm()">Reset</button>
+      </div>
+
+      <form id="telemetryForm" class="telemetry-sections" onsubmit="event.preventDefault(); runPrediction();">
+        
+        <!-- Temperatures & Oil -->
+        <div>
+          <div class="section-title">🌡️ Temperatures & Oil Level</div>
+          <div class="input-grid">
+            <div class="form-group">
+              <label for="OTI">OTI (°C)</label>
+              <input type="number" step="0.1" id="OTI" name="OTI" required>
+            </div>
+            <div class="form-group">
+              <label for="WTI">WTI (°C)</label>
+              <input type="number" step="0.1" id="WTI" name="WTI" required>
+            </div>
+            <div class="form-group">
+              <label for="ATI">ATI (°C)</label>
+              <input type="number" step="0.1" id="ATI" name="ATI" required>
+            </div>
+            <div class="form-group">
+              <label for="OLI">OLI (%)</label>
+              <input type="number" step="0.1" id="OLI" name="OLI" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- Voltages -->
+        <div>
+          <div class="section-title">⚡ Phase & Line Voltages (V)</div>
+          <div class="input-grid">
+            <div class="form-group"><label for="VL1">VL1 (V)</label><input type="number" step="0.1" id="VL1" name="VL1" required></div>
+            <div class="form-group"><label for="VL2">VL2 (V)</label><input type="number" step="0.1" id="VL2" name="VL2" required></div>
+            <div class="form-group"><label for="VL3">VL3 (V)</label><input type="number" step="0.1" id="VL3" name="VL3" required></div>
+            <div class="form-group"><label for="VL12">VL12 (V)</label><input type="number" step="0.1" id="VL12" name="VL12" required></div>
+            <div class="form-group"><label for="VL23">VL23 (V)</label><input type="number" step="0.1" id="VL23" name="VL23" required></div>
+            <div class="form-group"><label for="VL31">VL31 (V)</label><input type="number" step="0.1" id="VL31" name="VL31" required></div>
+          </div>
+        </div>
+
+        <!-- Currents -->
+        <div>
+          <div class="section-title">🔌 Phase & Neutral Currents (A)</div>
+          <div class="input-grid">
+            <div class="form-group"><label for="IL1">IL1 (A)</label><input type="number" step="0.1" id="IL1" name="IL1" required></div>
+            <div class="form-group"><label for="IL2">IL2 (A)</label><input type="number" step="0.1" id="IL2" name="IL2" required></div>
+            <div class="form-group"><label for="IL3">IL3 (A)</label><input type="number" step="0.1" id="IL3" name="IL3" required></div>
+            <div class="form-group"><label for="INUT">Neutral (A)</label><input type="number" step="0.1" id="INUT" name="INUT" required></div>
+            <div class="form-group"><label for="FRQ">Frequency (Hz)</label><input type="number" step="0.1" id="FRQ" name="FRQ" required></div>
+          </div>
+        </div>
+
+        <!-- Power & Energy -->
+        <div>
+          <div class="section-title">💡 Power, Energy & Demand</div>
+          <div class="input-grid">
+            <div class="form-group"><label for="KW">Total KW</label><input type="number" step="0.1" id="KW" name="KW" required></div>
+            <div class="form-group"><label for="KVA">Total KVA</label><input type="number" step="0.1" id="KVA" name="KVA" required></div>
+            <div class="form-group"><label for="KVAR">Total KVAR</label><input type="number" step="0.1" id="KVAR" name="KVAR" required></div>
+            <div class="form-group"><label for="Avg_PF">Avg PF</label><input type="number" step="0.001" id="Avg_PF" name="Avg_PF" required></div>
+            <div class="form-group"><label for="Sum_PF">Sum PF</label><input type="number" step="0.001" id="Sum_PF" name="Sum_PF" required></div>
+            <div class="form-group"><label for="KWH">KWH</label><input type="number" step="0.1" id="KWH" name="KWH" required></div>
+            <div class="form-group"><label for="KWH_I">KWH_I</label><input type="number" step="0.1" id="KWH_I" name="KWH_I" required></div>
+            <div class="form-group"><label for="KVARH">KVARH</label><input type="number" step="0.1" id="KVARH" name="KVARH" required></div>
+            <div class="form-group"><label for="MPD">MPD</label><input type="number" step="0.1" id="MPD" name="MPD" required></div>
+            <div class="form-group"><label for="MKVAD">MKVAD</label><input type="number" step="0.1" id="MKVAD" name="MKVAD" required></div>
+          </div>
+        </div>
+
+        <!-- Phase Power -->
+        <div>
+          <div class="section-title">⚡ Per-Phase Active & Reactive Power</div>
+          <div class="input-grid">
+            <div class="form-group"><label for="WL1">WL1 (W)</label><input type="number" step="1" id="WL1" name="WL1" required></div>
+            <div class="form-group"><label for="WL2">WL2 (W)</label><input type="number" step="1" id="WL2" name="WL2" required></div>
+            <div class="form-group"><label for="WL3">WL3 (W)</label><input type="number" step="1" id="WL3" name="WL3" required></div>
+            <div class="form-group"><label for="VAL1">VAL1 (VA)</label><input type="number" step="1" id="VAL1" name="VAL1" required></div>
+            <div class="form-group"><label for="VAL2">VAL2 (VA)</label><input type="number" step="1" id="VAL2" name="VAL2" required></div>
+            <div class="form-group"><label for="VAL3">VAL3 (VA)</label><input type="number" step="1" id="VAL3" name="VAL3" required></div>
+            <div class="form-group"><label for="RVAL1">RVAL1</label><input type="number" step="1" id="RVAL1" name="RVAL1" required></div>
+            <div class="form-group"><label for="RVAL2">RVAL2</label><input type="number" step="1" id="RVAL2" name="RVAL2" required></div>
+            <div class="form-group"><label for="RVAL3">RVAL3</label><input type="number" step="1" id="RVAL3" name="RVAL3" required></div>
+            <div class="form-group"><label for="PFL1">PFL1</label><input type="number" step="0.001" id="PFL1" name="PFL1" required></div>
+            <div class="form-group"><label for="PFL2">PFL2</label><input type="number" step="0.001" id="PFL2" name="PFL2" required></div>
+            <div class="form-group"><label for="PFL3">PFL3</label><input type="number" step="0.001" id="PFL3" name="PFL3" required></div>
+          </div>
+        </div>
+
+        <!-- Harmonics & Demand -->
+        <div>
+          <div class="section-title">🌊 Harmonics (THD %) & Max Demand</div>
+          <div class="input-grid">
+            <div class="form-group"><label for="THDVL1">THDVL1 (%)</label><input type="number" step="0.1" id="THDVL1" name="THDVL1" required></div>
+            <div class="form-group"><label for="THDVL2">THDVL2 (%)</label><input type="number" step="0.1" id="THDVL2" name="THDVL2" required></div>
+            <div class="form-group"><label for="THDVL3">THDVL3 (%)</label><input type="number" step="0.1" id="THDVL3" name="THDVL3" required></div>
+            <div class="form-group"><label for="THDIL1">THDIL1 (%)</label><input type="number" step="0.1" id="THDIL1" name="THDIL1" required></div>
+            <div class="form-group"><label for="THDIL2">THDIL2 (%)</label><input type="number" step="0.1" id="THDIL2" name="THDIL2" required></div>
+            <div class="form-group"><label for="THDIL3">THDIL3 (%)</label><input type="number" step="0.1" id="THDIL3" name="THDIL3" required></div>
+            <div class="form-group"><label for="MDIL1">MDIL1 (A)</label><input type="number" step="0.1" id="MDIL1" name="MDIL1" required></div>
+            <div class="form-group"><label for="MDIL2">MDIL2 (A)</label><input type="number" step="0.1" id="MDIL2" name="MDIL2" required></div>
+            <div class="form-group"><label for="MDIL3">MDIL3 (A)</label><input type="number" step="0.1" id="MDIL3" name="MDIL3" required></div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Right Column: AI Analytics & Prediction Output -->
+    <div class="results-container">
+      
+      <!-- Primary Risk Assessment Card -->
+      <div class="risk-hero">
+        <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">
+          Operational Risk Status
+        </div>
+        <div class="risk-badge normal" id="riskBadge">
+          <span id="riskIcon">🟢</span>
+          <span id="riskText">NORMAL</span>
+        </div>
+        <div style="font-size: 0.9rem; color: var(--text-muted);" id="classLabel">
+          Normal Operation (Class 0)
+        </div>
+
+        <div class="risk-score-container">
+          <div class="risk-score-header">
+            <span>Risk Score Index</span>
+            <span style="font-family: var(--font-mono); font-weight: 700; color: var(--text);" id="riskScoreVal">0.100</span>
+          </div>
+          <div class="risk-meter">
+            <div class="risk-meter-fill" id="riskMeterFill" style="width: 10%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key Model Metrics -->
+      <div class="metric-row">
+        <div class="metric-box">
+          <div class="metric-title">Predicted Oil Temp (OTI)</div>
+          <div class="metric-value" id="predOtiVal">-- °C</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);" id="otiResidual">Residual: --</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-title">Isolation Forest</div>
+          <div class="metric-value" id="anomalyStatus">Normal</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);" id="anomalyScoreVal">Score: --</div>
+        </div>
+      </div>
+
+      <!-- Probability Distribution -->
+      <div class="card" style="padding: 1rem;">
+        <div class="card-title" style="font-size: 0.85rem;">
+          <span>📈</span> Classifier Probability Distribution
+        </div>
+        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+          <div class="metric-box" style="flex: 1; padding: 0.5rem;">
+            <div class="metric-title" style="color: var(--normal);">Normal (0)</div>
+            <div class="metric-value" style="font-size: 0.95rem;" id="probNormal">--%</div>
+          </div>
+          <div class="metric-box" style="flex: 1; padding: 0.5rem;">
+            <div class="metric-title" style="color: var(--warning);">Warning (1)</div>
+            <div class="metric-value" style="font-size: 0.95rem;" id="probWarning">--%</div>
+          </div>
+          <div class="metric-box" style="flex: 1; padding: 0.5rem;">
+            <div class="metric-title" style="color: var(--danger);">Critical (2)</div>
+            <div class="metric-value" style="font-size: 0.95rem;" id="probCritical">--%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alert Card -->
+      <div class="alert-box alert-low" id="alertCard">
+        <div class="alert-title" id="alertTitle">
+          <span>🔔</span> <span id="alertSeverity">LOW SEVERITY ADVISORY</span>
+        </div>
+        <div class="alert-text" id="alertMessage">
+          System operating within normal parameters. Routine telemetry logged.
+        </div>
+      </div>
+
+      <!-- Human-Readable Explanation -->
+      <div class="card" style="padding: 1rem;">
+        <div class="card-title" style="font-size: 0.85rem;">
+          <span>📝</span> Diagnostic Explanation
+        </div>
+        <div class="explanation-box" id="explanationText">
+          Run an assessment to view automated diagnostic reasoning.
+        </div>
+      </div>
+
+      <!-- Abnormal Parameters Card -->
+      <div class="card" style="padding: 1rem;" id="abnormalCard">
+        <div class="card-title" style="font-size: 0.85rem;">
+          <span>⚠️</span> Abnormal Telemetry Flags (<span id="abnormalCount">0</span>)
+        </div>
+        <div id="abnormalTableWrapper" style="overflow-x: auto; margin-top: 0.5rem;">
+          <table class="abnormal-table">
+            <thead>
+              <tr>
+                <th>Param</th>
+                <th>Observed</th>
+                <th>Status</th>
+                <th>Safe Range</th>
+              </tr>
+            </thead>
+            <tbody id="abnormalTableBody">
+              <tr>
+                <td colspan="4" style="text-align: center; color: var(--text-muted);">No abnormal parameters detected.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div>Backend Member 2: ML Integration & Risk Engine — Scikit-Learn 1.5.2</div>
+    <div id="footerMeta">Endpoint: POST /api/predict</div>
+  </footer>
+
+  <script>
+    const API_BASE = window.location.origin.includes('5000') 
+      ? window.location.origin 
+      : 'http://localhost:5000';
+
+    // Preset Data Sets
+    const SCENARIOS = {
+      normal: {
+        OTI: 42.0, WTI: 55.0, ATI: 28.0, OLI: 50.0,
+        VL1: 235.4, VL2: 234.8, VL3: 236.0,
+        VL12: 407.5, VL23: 406.9, VL31: 408.2,
+        IL1: 45.0, IL2: 44.5, IL3: 45.5, INUT: 2.0,
+        WL1: 10500.0, WL2: 10400.0, WL3: 10600.0,
+        VAL1: 10620.0, VAL2: 10520.0, VAL3: 10720.0,
+        RVAL1: 1600.0, RVAL2: 1580.0, RVAL3: 1620.0,
+        PFL1: 0.989, PFL2: 0.988, PFL3: 0.990,
+        Avg_PF: 0.989, Sum_PF: 2.967, FRQ: 50.0,
+        THDVL1: 1.2, THDVL2: 1.3, THDVL3: 1.1,
+        THDIL1: 3.5, THDIL2: 3.4, THDIL3: 3.6,
+        MDIL1: 50.0, MDIL2: 50.0, MDIL3: 50.0,
+        KWH: 1250.5, KWH_I: 0.0, KVARH: 190.5,
+        KW: 31.5, KVA: 31.86, KVAR: 4.8,
+        MPD: 32.0, MKVAD: 32.5
+      },
+      warning: {
+        OTI: 96.0, WTI: 106.0, ATI: 35.0, OLI: 45.0,
+        VL1: 230.0, VL2: 228.0, VL3: 232.0,
+        VL12: 398.0, VL23: 395.0, VL31: 401.0,
+        IL1: 180.0, IL2: 175.0, IL3: 185.0, INUT: 12.0,
+        WL1: 37000.0, WL2: 36000.0, WL3: 38000.0,
+        VAL1: 41400.0, VAL2: 39900.0, VAL3: 42920.0,
+        RVAL1: 18600.0, RVAL2: 17200.0, RVAL3: 19800.0,
+        PFL1: 0.894, PFL2: 0.902, PFL3: 0.885,
+        Avg_PF: 0.680, Sum_PF: 2.040, FRQ: 48.5,
+        THDVL1: 8.5, THDVL2: 8.2, THDVL3: 7.8,
+        THDIL1: 21.0, THDIL2: 20.5, THDIL3: 21.5,
+        MDIL1: 190.0, MDIL2: 185.0, MDIL3: 195.0,
+        KWH: 3450.0, KWH_I: 0.0, KVARH: 890.0,
+        KW: 111.0, KVA: 124.2, KVAR: 55.6,
+        MPD: 115.0, MKVAD: 128.0
+      },
+      high_risk: {
+        OTI: 135.0, WTI: 150.0, ATI: 50.0, OLI: 20.0,
+        VL1: 215.0, VL2: 205.0, VL3: 245.0,
+        VL12: 365.0, VL23: 390.0, VL31: 420.0,
+        IL1: 450.0, IL2: 200.0, IL3: 80.0, INUT: 55.0,
+        WL1: 96750.0, WL2: 41000.0, WL3: 19600.0,
+        VAL1: 96750.0, VAL2: 41000.0, VAL3: 19600.0,
+        RVAL1: 45000.0, RVAL2: 20000.0, RVAL3: 10000.0,
+        PFL1: 0.650, PFL2: 0.650, PFL3: 0.650,
+        Avg_PF: 0.650, Sum_PF: 1.950, FRQ: 48.0,
+        THDVL1: 15.0, THDVL2: 15.5, THDVL3: 14.8,
+        THDIL1: 35.0, THDIL2: 34.0, THDIL3: 36.0,
+        MDIL1: 480.0, MDIL2: 220.0, MDIL3: 95.0,
+        KWH: 9500.0, KWH_I: 0.0, KVARH: 4200.0,
+        KW: 157.3, KVA: 242.0, KVAR: 183.0,
+        MPD: 170.0, MKVAD: 260.0
+      },
+      zero: {
+        OTI: 0.0, WTI: 0.0, ATI: 0.0, OLI: 0.0,
+        VL1: 0.0, VL2: 0.0, VL3: 0.0,
+        VL12: 0.0, VL23: 0.0, VL31: 0.0,
+        IL1: 0.0, IL2: 0.0, IL3: 0.0, INUT: 0.0,
+        WL1: 0.0, WL2: 0.0, WL3: 0.0,
+        VAL1: 0.0, VAL2: 0.0, VAL3: 0.0,
+        RVAL1: 0.0, RVAL2: 0.0, RVAL3: 0.0,
+        PFL1: 0.0, PFL2: 0.0, PFL3: 0.0,
+        Avg_PF: 0.0, Sum_PF: 0.0, FRQ: 50.0,
+        THDVL1: 0.0, THDVL2: 0.0, THDVL3: 0.0,
+        THDIL1: 0.0, THDIL2: 0.0, THDIL3: 0.0,
+        MDIL1: 0.0, MDIL2: 0.0, MDIL3: 0.0,
+        KWH: 0.0, KWH_I: 0.0, KVARH: 0.0,
+        KW: 0.0, KVA: 0.0, KVAR: 0.0,
+        MPD: 0.0, MKVAD: 0.0
+      }
+    };
+
+    function loadScenario(type) {
+      const data = SCENARIOS[type] || SCENARIOS.normal;
+      for (const [key, val] of Object.entries(data)) {
+        const input = document.getElementById(key);
+        if (input) input.value = val;
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('telemetryForm').reset();
+      loadScenario('normal');
+    }
+
+    async function checkHealth() {
+      try {
+        const res = await fetch(`${API_BASE}/api/model/status`);
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('statusDot').className = 'status-dot';
+          document.getElementById('statusText').innerText = 'API & Models Ready';
+          if (data.classifier && data.classifier.n_features_in) {
+            document.getElementById('modelFeatureBadge').innerText = `${data.classifier.type} (${data.classifier.n_features_in} Features)`;
+          }
+        } else {
+          throw new Error('Status not ok');
+        }
+      } catch (e) {
+        document.getElementById('statusDot').className = 'status-dot offline';
+        document.getElementById('statusText').innerText = 'API Disconnected';
+      }
+    }
+
+    async function runPrediction() {
+      const btn = document.getElementById('btnPredict');
+      btn.disabled = true;
+      btn.innerText = 'Analyzing Telemetry...';
+
+      const payload = {};
+      const inputs = document.querySelectorAll('#telemetryForm input');
+      inputs.forEach(inp => {
+        payload[inp.name] = parseFloat(inp.value) || 0.0;
+      });
+
+      try {
+        const res = await fetch(`${API_BASE}/api/predict`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          alert('Prediction Error: ' + (data.error || 'Server returned error') + (data.errors ? '\n' + data.errors.join('\n') : ''));
+          return;
+        }
+
+        renderResults(data, payload);
+      } catch (err) {
+        alert('Network or server error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Run ML Risk Assessment ➔';
+      }
+    }
+
+    function renderResults(res, rawInput) {
+      const p = res.prediction || {};
+      const riskLevel = p.risk_level || 'NORMAL';
+      const riskScore = p.risk_score !== undefined ? p.risk_score : 0;
+      const probs = p.probabilities || {};
+
+      // 1. Badge & Meter
+      const badge = document.getElementById('riskBadge');
+      const icon = document.getElementById('riskIcon');
+      const text = document.getElementById('riskText');
+      badge.className = 'risk-badge ' + riskLevel.toLowerCase();
+      text.innerText = riskLevel.replace('_', ' ');
+
+      if (riskLevel === 'NORMAL') icon.innerText = '🟢';
+      else if (riskLevel === 'WARNING') icon.innerText = '🟡';
+      else icon.innerText = '🔴';
+
+      document.getElementById('classLabel').innerText = `${p.class_label || 'Operation'} (Class ${p.class_id !== undefined ? p.class_id : '--'})`;
+      document.getElementById('riskScoreVal').innerText = Number(riskScore).toFixed(4);
+      document.getElementById('riskMeterFill').style.width = Math.min(100, Math.max(5, riskScore * 100)) + '%';
+
+      // 2. Probabilities
+      document.getElementById('probNormal').innerText = probs.normal !== undefined ? (probs.normal * 100).toFixed(1) + '%' : '--';
+      document.getElementById('probWarning').innerText = probs.warning !== undefined ? (probs.warning * 100).toFixed(1) + '%' : '--';
+      document.getElementById('probCritical').innerText = probs.high_risk !== undefined ? (probs.high_risk * 100).toFixed(1) + '%' : '--';
+
+      // 3. Regressor & Anomaly
+      const reg = res.oil_temperature_prediction || {};
+      if (reg.predicted_oti !== null && reg.predicted_oti !== undefined) {
+        document.getElementById('predOtiVal').innerText = Number(reg.predicted_oti).toFixed(1) + ' °C';
+        const resDiff = (Number(rawInput.OTI || 0) - Number(reg.predicted_oti)).toFixed(1);
+        document.getElementById('otiResidual').innerText = `Residual (Obs - Pred): ${resDiff} °C`;
+      } else {
+        document.getElementById('predOtiVal').innerText = 'N/A';
+      }
+
+      const anom = res.anomaly_detection || {};
+      const anomStatus = document.getElementById('anomalyStatus');
+      if (anom.is_anomaly === true) {
+        anomStatus.innerText = 'Anomaly Flagged';
+        anomStatus.style.color = 'var(--danger)';
+      } else {
+        anomStatus.innerText = 'Normal Envelope';
+        anomStatus.style.color = 'var(--normal)';
+      }
+      document.getElementById('anomalyScoreVal').innerText = `Score: ${anom.anomaly_score !== null && anom.anomaly_score !== undefined ? anom.anomaly_score.toFixed(4) : '--'}`;
+
+      // 4. Alert Card
+      const alertData = res.alert || {};
+      const alertCard = document.getElementById('alertCard');
+      const sev = (alertData.severity || 'LOW').toUpperCase();
+      alertCard.className = `alert-box alert-${sev.toLowerCase()}`;
+      document.getElementById('alertSeverity').innerText = `${sev} SEVERITY ADVISORY`;
+      document.getElementById('alertMessage').innerText = alertData.message || 'No active alerts.';
+
+      // 5. Explanation
+      document.getElementById('explanationText').innerText = res.explanation || 'No explanation generated.';
+
+      // 6. Abnormal Parameters Table
+      const abList = res.abnormal_parameters || [];
+      document.getElementById('abnormalCount').innerText = abList.length;
+      const tbody = document.getElementById('abnormalTableBody');
+      tbody.innerHTML = '';
+      if (abList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No abnormal parameters detected.</td></tr>';
+      } else {
+        abList.forEach(item => {
+          const tr = document.createElement('tr');
+          const isHigh = item.status === 'HIGH';
+          tr.innerHTML = `
+            <td style="font-weight: 600;">${item.parameter}</td>
+            <td style="font-family: var(--font-mono);">${item.value} ${item.unit || ''}</td>
+            <td><span class="badge-status ${isHigh ? 'badge-high' : 'badge-low'}">${item.status}</span></td>
+            <td style="color: var(--text-muted); font-family: var(--font-mono);">${item.safe_min} - ${item.safe_max} ${item.unit || ''}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      loadScenario('normal');
+      checkHealth();
+    });
+  </script>
+</body>
+</html>
