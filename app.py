@@ -31,7 +31,7 @@ predictor = TransformerPredictor(models_dir="./models")
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     """Serve the main dashboard."""
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html")
 
 
 @app.get("/api/health")
