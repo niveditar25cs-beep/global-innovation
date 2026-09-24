@@ -8,8 +8,11 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+# Resolve absolute paths so the app works in Vercel's serverless environment
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Ensure src is on the path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+sys.path.insert(0, os.path.join(BASE_DIR, "src"))
 from predict import TransformerPredictor
 from src.db import get_latest_reading, get_historical_readings
 
@@ -19,13 +22,13 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Mount static files and templates
-app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/reports", StaticFiles(directory="reports"), name="reports")
-templates = Jinja2Templates(directory="templates")
+# Mount static files and templates using absolute paths
+app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
+app.mount("/reports", StaticFiles(directory=os.path.join(BASE_DIR, "reports")), name="reports")
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
-# Load predictor once at startup
-predictor = TransformerPredictor(models_dir="./models")
+# Load predictor once at startup using absolute path
+predictor = TransformerPredictor(models_dir=os.path.join(BASE_DIR, "models"))
 
 
 @app.get("/", response_class=HTMLResponse)

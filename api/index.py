@@ -1,0 +1,9 @@
+import sys
+import os
+
+# Add the project root to Python path so imports work in Vercel
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+# Import the FastAPI app from the project root
+from app import app
+
