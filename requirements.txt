@@ -10,3 +10,7 @@ jinja2
 python-multipart
 pydantic
 requests
+
+sqlalchemy
+psycopg2-binary
+python-dotenv
