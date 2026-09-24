@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transformer Health Monitor – AI Predictive Maintenance</title>
-    <meta name="description" content="Real-time AI-powered predictive maintenance dashboard for distributed transformer monitoring using IoT telemetry and machine learning.">
+    <meta name="description"
+        content="Real-time AI-powered predictive maintenance dashboard for distributed transformer monitoring using IoT telemetry and machine learning.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
     <!-- ─── Top Navigation ─── -->
     <nav class="top-bar">
@@ -19,8 +24,10 @@
         <div class="nav-links">
             <a href="#predict" class="nav-link active" data-tab="predict">Predict</a>
             <a href="#batch" class="nav-link" data-tab="batch">Batch Upload</a>
+            <a href="#monitoring" class="nav-link" data-tab="monitoring">Live Monitoring</a>
             <a href="#dashboard" class="nav-link" data-tab="dashboard">Dashboard</a>
             <a href="/docs" class="nav-link" target="_blank">API Docs</a>
+            <a href="#history" class="nav-link" data-tab="history">History</a>
         </div>
         <div class="health-badge" id="healthBadge">
             <span class="dot green"></span> System Online
@@ -31,7 +38,8 @@
     <header class="hero">
         <div class="hero-glow"></div>
         <h1>Distributed Transformer <span class="gradient-text">Predictive Maintenance</span></h1>
-        <p class="subtitle">AI-powered fault risk classification &amp; oil temperature forecasting from IoT sensor telemetry</p>
+        <p class="subtitle">AI-powered fault risk classification &amp; oil temperature forecasting from IoT sensor
+            telemetry</p>
         <div class="model-badges">
             <span class="badge blue" id="clsModelBadge">Classification: Loading…</span>
             <span class="badge amber" id="regModelBadge">Regression: Loading…</span>
@@ -44,78 +52,124 @@
         <section class="tab-panel active" id="tab-predict">
             <div class="card glass">
                 <h2 class="card-title">🔍 Single Reading – Live Prediction</h2>
-                <p class="card-desc">Enter transformer sensor readings to get real-time risk assessment and temperature forecast.</p>
+                <p class="card-desc">Enter transformer sensor readings to get real-time risk assessment and temperature
+                    forecast.</p>
 
                 <form id="predictForm" class="sensor-grid">
                     <!-- Electrical -->
                     <fieldset class="field-group">
                         <legend>⚡ Electrical</legend>
-                        <div class="field"><label>VL1 (V)</label><input type="number" step="any" name="VL1" value="240.0" required></div>
-                        <div class="field"><label>VL2 (V)</label><input type="number" step="any" name="VL2" value="239.5" required></div>
-                        <div class="field"><label>VL3 (V)</label><input type="number" step="any" name="VL3" value="240.2" required></div>
-                        <div class="field"><label>IL1 (A)</label><input type="number" step="any" name="IL1" value="12.3" required></div>
-                        <div class="field"><label>IL2 (A)</label><input type="number" step="any" name="IL2" value="11.8" required></div>
-                        <div class="field"><label>IL3 (A)</label><input type="number" step="any" name="IL3" value="12.1" required></div>
-                        <div class="field"><label>VL12 (V)</label><input type="number" step="any" name="VL12" value="415.0"></div>
-                        <div class="field"><label>VL23 (V)</label><input type="number" step="any" name="VL23" value="414.5"></div>
-                        <div class="field"><label>VL31 (V)</label><input type="number" step="any" name="VL31" value="415.2"></div>
-                        <div class="field"><label>INUT (A)</label><input type="number" step="any" name="INUT" value="0.5"></div>
+                        <div class="field"><label>VL1 (V)</label><input type="number" step="any" name="VL1"
+                                value="240.0" required></div>
+                        <div class="field"><label>VL2 (V)</label><input type="number" step="any" name="VL2"
+                                value="239.5" required></div>
+                        <div class="field"><label>VL3 (V)</label><input type="number" step="any" name="VL3"
+                                value="240.2" required></div>
+                        <div class="field"><label>IL1 (A)</label><input type="number" step="any" name="IL1" value="12.3"
+                                required></div>
+                        <div class="field"><label>IL2 (A)</label><input type="number" step="any" name="IL2" value="11.8"
+                                required></div>
+                        <div class="field"><label>IL3 (A)</label><input type="number" step="any" name="IL3" value="12.1"
+                                required></div>
+                        <div class="field"><label>VL12 (V)</label><input type="number" step="any" name="VL12"
+                                value="415.0"></div>
+                        <div class="field"><label>VL23 (V)</label><input type="number" step="any" name="VL23"
+                                value="414.5"></div>
+                        <div class="field"><label>VL31 (V)</label><input type="number" step="any" name="VL31"
+                                value="415.2"></div>
+                        <div class="field"><label>INUT (A)</label><input type="number" step="any" name="INUT"
+                                value="0.5"></div>
                     </fieldset>
 
                     <!-- Thermal -->
                     <fieldset class="field-group">
                         <legend>🌡️ Thermal</legend>
-                        <div class="field"><label>OTI (°C)</label><input type="number" step="any" name="OTI" value="55.0" required></div>
-                        <div class="field"><label>WTI (°C)</label><input type="number" step="any" name="WTI" value="60.0" required></div>
-                        <div class="field"><label>ATI (°C)</label><input type="number" step="any" name="ATI" value="32.0" required></div>
-                        <div class="field"><label>OLI (%)</label><input type="number" step="any" name="OLI" value="45.0" required></div>
+                        <div class="field"><label>OTI (°C)</label><input type="number" step="any" name="OTI"
+                                value="55.0" required></div>
+                        <div class="field"><label>WTI (°C)</label><input type="number" step="any" name="WTI"
+                                value="60.0" required></div>
+                        <div class="field"><label>ATI (°C)</label><input type="number" step="any" name="ATI"
+                                value="32.0" required></div>
+                        <div class="field"><label>OLI (%)</label><input type="number" step="any" name="OLI" value="45.0"
+                                required></div>
                     </fieldset>
 
                     <!-- Power -->
                     <fieldset class="field-group">
                         <legend>🔋 Power</legend>
-                        <div class="field"><label>WL1 (W)</label><input type="number" step="any" name="WL1" value="2500"></div>
-                        <div class="field"><label>WL2 (W)</label><input type="number" step="any" name="WL2" value="2400"></div>
-                        <div class="field"><label>WL3 (W)</label><input type="number" step="any" name="WL3" value="2450"></div>
-                        <div class="field"><label>VAL1</label><input type="number" step="any" name="VAL1" value="2800"></div>
-                        <div class="field"><label>VAL2</label><input type="number" step="any" name="VAL2" value="2750"></div>
-                        <div class="field"><label>VAL3</label><input type="number" step="any" name="VAL3" value="2780"></div>
-                        <div class="field"><label>RVAL1</label><input type="number" step="any" name="RVAL1" value="400"></div>
-                        <div class="field"><label>RVAL2</label><input type="number" step="any" name="RVAL2" value="380"></div>
-                        <div class="field"><label>RVAL3</label><input type="number" step="any" name="RVAL3" value="390"></div>
+                        <div class="field"><label>WL1 (W)</label><input type="number" step="any" name="WL1"
+                                value="2500"></div>
+                        <div class="field"><label>WL2 (W)</label><input type="number" step="any" name="WL2"
+                                value="2400"></div>
+                        <div class="field"><label>WL3 (W)</label><input type="number" step="any" name="WL3"
+                                value="2450"></div>
+                        <div class="field"><label>VAL1</label><input type="number" step="any" name="VAL1" value="2800">
+                        </div>
+                        <div class="field"><label>VAL2</label><input type="number" step="any" name="VAL2" value="2750">
+                        </div>
+                        <div class="field"><label>VAL3</label><input type="number" step="any" name="VAL3" value="2780">
+                        </div>
+                        <div class="field"><label>RVAL1</label><input type="number" step="any" name="RVAL1" value="400">
+                        </div>
+                        <div class="field"><label>RVAL2</label><input type="number" step="any" name="RVAL2" value="380">
+                        </div>
+                        <div class="field"><label>RVAL3</label><input type="number" step="any" name="RVAL3" value="390">
+                        </div>
                     </fieldset>
 
                     <!-- Power Factor & Harmonics -->
                     <fieldset class="field-group">
                         <legend>📊 Power Factor &amp; Harmonics</legend>
-                        <div class="field"><label>PFL1</label><input type="number" step="any" name="PFL1" value="0.92"></div>
-                        <div class="field"><label>PFL2</label><input type="number" step="any" name="PFL2" value="0.91"></div>
-                        <div class="field"><label>PFL3</label><input type="number" step="any" name="PFL3" value="0.90"></div>
-                        <div class="field"><label>Avg PF</label><input type="number" step="any" name="Avg_PF" value="0.91"></div>
-                        <div class="field"><label>Sum PF</label><input type="number" step="any" name="Sum_PF" value="2.73"></div>
-                        <div class="field"><label>FRQ (Hz)</label><input type="number" step="any" name="FRQ" value="50.0"></div>
-                        <div class="field"><label>THDVL1</label><input type="number" step="any" name="THDVL1" value="2.1"></div>
-                        <div class="field"><label>THDVL2</label><input type="number" step="any" name="THDVL2" value="2.0"></div>
-                        <div class="field"><label>THDVL3</label><input type="number" step="any" name="THDVL3" value="2.2"></div>
-                        <div class="field"><label>THDIL1</label><input type="number" step="any" name="THDIL1" value="5.1"></div>
-                        <div class="field"><label>THDIL2</label><input type="number" step="any" name="THDIL2" value="5.0"></div>
-                        <div class="field"><label>THDIL3</label><input type="number" step="any" name="THDIL3" value="4.9"></div>
-                        <div class="field"><label>MDIL1</label><input type="number" step="any" name="MDIL1" value="15.0"></div>
-                        <div class="field"><label>MDIL2</label><input type="number" step="any" name="MDIL2" value="14.5"></div>
-                        <div class="field"><label>MDIL3</label><input type="number" step="any" name="MDIL3" value="14.8"></div>
+                        <div class="field"><label>PFL1</label><input type="number" step="any" name="PFL1" value="0.92">
+                        </div>
+                        <div class="field"><label>PFL2</label><input type="number" step="any" name="PFL2" value="0.91">
+                        </div>
+                        <div class="field"><label>PFL3</label><input type="number" step="any" name="PFL3" value="0.90">
+                        </div>
+                        <div class="field"><label>Avg PF</label><input type="number" step="any" name="Avg_PF"
+                                value="0.91"></div>
+                        <div class="field"><label>Sum PF</label><input type="number" step="any" name="Sum_PF"
+                                value="2.73"></div>
+                        <div class="field"><label>FRQ (Hz)</label><input type="number" step="any" name="FRQ"
+                                value="50.0"></div>
+                        <div class="field"><label>THDVL1</label><input type="number" step="any" name="THDVL1"
+                                value="2.1"></div>
+                        <div class="field"><label>THDVL2</label><input type="number" step="any" name="THDVL2"
+                                value="2.0"></div>
+                        <div class="field"><label>THDVL3</label><input type="number" step="any" name="THDVL3"
+                                value="2.2"></div>
+                        <div class="field"><label>THDIL1</label><input type="number" step="any" name="THDIL1"
+                                value="5.1"></div>
+                        <div class="field"><label>THDIL2</label><input type="number" step="any" name="THDIL2"
+                                value="5.0"></div>
+                        <div class="field"><label>THDIL3</label><input type="number" step="any" name="THDIL3"
+                                value="4.9"></div>
+                        <div class="field"><label>MDIL1</label><input type="number" step="any" name="MDIL1"
+                                value="15.0"></div>
+                        <div class="field"><label>MDIL2</label><input type="number" step="any" name="MDIL2"
+                                value="14.5"></div>
+                        <div class="field"><label>MDIL3</label><input type="number" step="any" name="MDIL3"
+                                value="14.8"></div>
                     </fieldset>
 
                     <!-- Energy -->
                     <fieldset class="field-group">
                         <legend>⚙️ Energy / Demand</legend>
-                        <div class="field"><label>KWH</label><input type="number" step="any" name="KWH" value="5400"></div>
-                        <div class="field"><label>KWH_I</label><input type="number" step="any" name="KWH_I" value="0"></div>
-                        <div class="field"><label>KVARH</label><input type="number" step="any" name="KVARH" value="5700"></div>
+                        <div class="field"><label>KWH</label><input type="number" step="any" name="KWH" value="5400">
+                        </div>
+                        <div class="field"><label>KWH_I</label><input type="number" step="any" name="KWH_I" value="0">
+                        </div>
+                        <div class="field"><label>KVARH</label><input type="number" step="any" name="KVARH"
+                                value="5700"></div>
                         <div class="field"><label>KW</label><input type="number" step="any" name="KW" value="7.5"></div>
-                        <div class="field"><label>KVA</label><input type="number" step="any" name="KVA" value="8.2"></div>
-                        <div class="field"><label>KVAR</label><input type="number" step="any" name="KVAR" value="3.1"></div>
-                        <div class="field"><label>MPD</label><input type="number" step="any" name="MPD" value="23.6"></div>
-                        <div class="field"><label>MKVAD</label><input type="number" step="any" name="MKVAD" value="23.6"></div>
+                        <div class="field"><label>KVA</label><input type="number" step="any" name="KVA" value="8.2">
+                        </div>
+                        <div class="field"><label>KVAR</label><input type="number" step="any" name="KVAR" value="3.1">
+                        </div>
+                        <div class="field"><label>MPD</label><input type="number" step="any" name="MPD" value="23.6">
+                        </div>
+                        <div class="field"><label>MKVAD</label><input type="number" step="any" name="MKVAD"
+                                value="23.6"></div>
                     </fieldset>
 
                     <button type="submit" class="btn-primary" id="predictBtn">
@@ -160,11 +214,48 @@
             </div>
         </section>
 
+        <!-- ────── Historical Transformer Trends ────── -->
+<section class="tab-panel" id="tab-history">
+
+    <div class="card glass">
+        <h2 class="card-title">📈 Historical Transformer Trends</h2>
+
+        <p class="card-desc">
+            Historical telemetry readings retrieved from the transformer database.
+        </p>
+
+        <div class="dash-grid">
+
+            <div class="dash-card">
+                <h3>Temperature Trend</h3>
+                <canvas id="temperatureChart"></canvas>
+            </div>
+
+            <div class="dash-card">
+                <h3>Voltage Trend</h3>
+                <canvas id="voltageChart"></canvas>
+            </div>
+
+            <div class="dash-card">
+                <h3>Current Trend</h3>
+                <canvas id="currentChart"></canvas>
+            </div>
+
+            <div class="dash-card">
+                <h3>Power Trend</h3>
+                <canvas id="powerChart"></canvas>
+            </div>
+
+        </div>
+    </div>
+
+</section>
         <!-- ─── Tab: Batch ─── -->
         <section class="tab-panel" id="tab-batch">
             <div class="card glass">
                 <h2 class="card-title">📁 Batch CSV Upload</h2>
-                <p class="card-desc">Upload a CSV file with transformer sensor readings for batch prediction. Results can be downloaded as CSV.</p>
+                <p class="card-desc">Upload a CSV file with transformer sensor readings for batch prediction. Results
+                    can be downloaded as CSV.</p>
                 <form id="batchForm" enctype="multipart/form-data">
                     <div class="upload-zone" id="uploadZone">
                         <span class="upload-icon">📄</span>
@@ -193,11 +284,13 @@
                     </div>
                     <div class="dash-card">
                         <h3>Confusion Matrix</h3>
-                        <img id="cmImage" src="/reports/classification_confusion_matrix.png" alt="Confusion Matrix" class="report-img">
+                        <img id="cmImage" src="/reports/classification_confusion_matrix.png" alt="Confusion Matrix"
+                            class="report-img">
                     </div>
                     <div class="dash-card">
                         <h3>Regression: Actual vs Predicted</h3>
-                        <img id="regImage" src="/reports/regression_actual_vs_pred.png" alt="Regression Plot" class="report-img">
+                        <img id="regImage" src="/reports/regression_actual_vs_pred.png" alt="Regression Plot"
+                            class="report-img">
                     </div>
                     <div class="dash-card">
                         <h3>Regression Metrics</h3>
@@ -206,6 +299,74 @@
                 </div>
             </div>
         </section>
+        <!-- ───── Live Transformer Monitoring ───── -->
+<section class="tab-panel" id="tab-monitoring">
+    <div class="card glass">
+        <h2 class="card-title">⚡ Live Transformer Monitoring</h2>
+        <p class="card-desc">
+            Real-time transformer telemetry and AI-based risk assessment.
+        </p>
+
+        <div class="dash-grid">
+
+            <div class="dash-card">
+                <h3>Transformer</h3>
+                <p id="transformerId">Loading...</p>
+                <p id="lastUpdate">Waiting for reading...</p>
+            </div>
+
+            <div class="dash-card">
+                <h3>Safety Status</h3>
+                <p id="transformerStatus">Loading...</p>
+            </div>
+
+            <div class="dash-card">
+                <h3>Risk Level</h3>
+            <p id="monitorRiskLevel">—</p>   
+            </div>
+
+            <div class="dash-card">
+                <h3>Predicted Oil Temperature</h3>
+            <p id="monitorPredTemp">—</p>    
+            </div>
+
+            <div class="dash-card">
+                <h3>Temperature</h3>
+                <p>OTI: <span id="otiValue">—</span></p>
+                <p>WTI: <span id="wtiValue">—</span></p>
+                <p>ATI: <span id="atiValue">—</span></p>
+            </div>
+
+            <div class="dash-card">
+                <h3>Voltage</h3>
+                <p>L1: <span id="voltageL1">—</span></p>
+                <p>L2: <span id="voltageL2">—</span></p>
+                <p>L3: <span id="voltageL3">—</span></p>
+            </div>
+
+            <div class="dash-card">
+                <h3>Current</h3>
+                <p>L1: <span id="currentL1">—</span></p>
+                <p>L2: <span id="currentL2">—</span></p>
+                <p>L3: <span id="currentL3">—</span></p>
+            </div>
+
+            <div class="dash-card">
+                <h3>Power</h3>
+                <p>Power: <span id="powerValue">—</span></p>
+                <p>Power Factor: <span id="powerFactorValue">—</span></p>
+            </div>
+
+            <div class="dash-card">
+                <h3>Risk Probabilities</h3>
+                <p>Normal: <span id="monitorProbNormal">—</span></p>
+                <p>Warning: <span id="monitorProbWarning">—</span></p>
+                <p>Critical: <span id="monitorProbCritical">—</span></p>
+            </div>
+
+        </div>
+    </div>
+</section>
     </main>
 
     <footer class="footer">
@@ -214,4 +375,5 @@
 
     <script src="/static/app.js"></script>
 </body>
+
 </html>

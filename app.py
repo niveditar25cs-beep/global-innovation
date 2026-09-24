@@ -11,6 +11,7 @@ from fastapi.templating import Jinja2Templates
 # Ensure src is on the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 from predict import TransformerPredictor
+from src.db import get_latest_reading, get_historical_readings
 
 app = FastAPI(
     title="TransformerAI - Predictive Maintenance API",
@@ -42,8 +43,38 @@ async def health():
         "regression_model": predictor.metadata.get("best_regression_model", "N/A"),
         "records_trained_on": predictor.metadata.get("records", 0),
     }
+@app.get("/api/transformer/latest")
+async def latest_transformer_reading():
+    """
+    Get the latest transformer reading from PostgreSQL
+    and run it through the ML prediction engine.
+    """
+    reading = get_latest_reading()
 
+    if reading is None:
+        return {
+            "status": "no_data",
+            "message": "No transformer readings found"
+        }
 
+    prediction = predictor.predict_single(reading)
+
+    return {
+        "status": "success",
+        "transformer_id": "ML-TRANSFORMER-01",
+        "reading": reading,
+        "risk": prediction
+    }
+@app.get("/api/transformer/history")
+async def transformer_history(limit: int = 50):
+    readings = get_historical_readings(limit)
+
+    return {
+        "status": "success",
+        "transformer_id": "ML-TRANSFORMER-01",
+        "count": len(readings),
+        "readings": readings
+    }
 @app.get("/api/metadata")
 async def metadata():
     """Return full model training metadata."""
